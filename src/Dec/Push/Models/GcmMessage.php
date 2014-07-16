@@ -13,6 +13,12 @@ class GcmMessage implements MessageInterface {
      */
     private $parameters;
 
+    function __construct($content, $parameters)
+    {
+        $this->content = $content;
+        $this->parameters = $parameters;
+    }
+
     /**
      * Get the message content
      * @return string

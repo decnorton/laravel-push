@@ -3,6 +3,8 @@
 use Dec\Collection\DeviceCollection;
 use Dec\Push\Models\GcmMessage;
 use Dec\Push\Models\GcmResponse;
+use Dec\Push\Models\MessageInterface;
+use Dec\Push\Models\Push;
 use Dec\Push\Models\PushInterface;
 use Dec\Push\Models\PushResult;
 use GuzzleHttp\Client;
@@ -34,6 +36,26 @@ class GcmAdapter extends BaseAdapter {
             throw new \InvalidArgumentException("Missing api_key");
 
         $this->client = new Client();
+    }
+
+    /**
+     * @param $content
+     * @param $parameters
+     * @return GcmMessage
+     */
+    public function createMessage($content, $parameters)
+    {
+        return new GcmMessage($content, $parameters);
+    }
+
+    /**
+     * @param DeviceCollection $devices
+     * @param MessageInterface $message
+     * @return PushInterface
+     */
+    public function createPush(DeviceCollection $devices, MessageInterface $message)
+    {
+        return new Push($devices, $message);
     }
 
     /**

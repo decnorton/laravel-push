@@ -23,14 +23,6 @@ class PushManager extends Collection {
         $this->environment = $environment;
     }
 
-    /**
-     * Alias for add()
-     * @param PushInterface $push
-     */
-    public function queue(PushInterface $push)
-    {
-        $this->add($push);
-    }
 
     /**
      * @return string
@@ -48,23 +40,41 @@ class PushManager extends Collection {
         $this->environment = $environment;
     }
 
+    /**
+     * Adds a Push to the queue
+     * @param PushInterface $push
+     */
     public function add(PushInterface $push)
     {
-        $this->items[] = $push;
+        if ( ! empty($push))
+            $this->items[] = $push;
     }
 
+    /**
+     * Alias for add()
+     * @param PushInterface $push
+     */
+    public function queue(PushInterface $push)
+    {
+        $this->add($push);
+    }
+
+    /**
+     * @return array
+     */
     public function send()
     {
         $results = [];
 
         foreach ($this as $push)
         {
-            $adapter = $push->getAdapter();
-            $adapter->setEnvironment($this->getEnvironment());
-
-            if ($result = $adapter->push($push))
+            if ($push instanceof PushInterface)
             {
-                $results[] = $result;
+                $adapter = $push->getAdapter();
+                $adapter->setEnvironment($this->getEnvironment());
+
+                if ($result = $adapter->push($push))
+                    $results[] = $result;
             }
         }
 

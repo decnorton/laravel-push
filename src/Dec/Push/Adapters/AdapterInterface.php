@@ -1,5 +1,7 @@
 <?php namespace Dec\Push\Adapters;
 
+use Dec\Collection\DeviceCollection;
+use Dec\Push\Models\MessageInterface;
 use Dec\Push\Models\PushInterface;
 
 /**
@@ -7,8 +9,7 @@ use Dec\Push\Models\PushInterface;
  *
  * @author Cédric Dugat <cedric@dugat.me>
  */
-interface AdapterInterface
-{
+interface AdapterInterface {
 
     /**
      * @param $environment
@@ -34,6 +35,21 @@ interface AdapterInterface
      * @return boolean
      */
     public function isValidToken($token);
+
+
+    /**
+     * @param $content
+     * @param $parameters
+     * @return MessageInterface
+     */
+    public function createMessage($content, $parameters);
+
+    /**
+     * @param DeviceCollection $devices
+     * @param MessageInterface $message
+     * @return PushInterface
+     */
+    public function createPush(DeviceCollection $devices, MessageInterface $message);
 
     /**
      * Get default parameters.

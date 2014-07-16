@@ -2,8 +2,6 @@
 
 use DateTime;
 use Dec\Collection\DeviceCollection;
-use Dec\Models\MessageInterface;
-use Dec\Push\Adapters\AdapterInterface;
 
 interface PushInterface {
 
@@ -32,17 +30,6 @@ interface PushInterface {
      * @return bool
      */
     public function sent();
-
-    /**
-     * @return AdapterInterface
-     */
-    public function getAdapter();
-
-    /**
-     * @param AdapterInterface $adapter
-     * @return PushInterface
-     */
-    public function setAdapter(AdapterInterface $adapter);
 
     /**
      * @return MessageInterface

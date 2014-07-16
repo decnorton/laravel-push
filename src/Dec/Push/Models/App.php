@@ -2,22 +2,30 @@
 
 use Config;
 use Dec\Collection\DeviceCollection;
+use Dec\Push\Adapters\AdapterInterface;
 use Dec\Push\Exceptions\InvalidAppException;
 use Dec\Push\Exceptions\InvalidPushServiceException;
-use Dec\Push\Models\DeviceInterface;
-use Dec\PushManager;
+use Dec\Push\PushManager;
 
 class App {
 
+    /**
+     * @var array
+     */
     protected $config;
+
+    /**
+     * @var PushManager
+     */
     protected $pushManager;
+
+    /**
+     * @var AdapterInterface
+     */
     protected $adapter;
-    protected $devices;
 
     public function __construct($name)
     {
-        dd('boobs');
-
         if ( ! Config::has("push::{$name}"))
             throw new InvalidAppException("Configuration '{$name}' doesn't exist");
 
@@ -29,16 +37,18 @@ class App {
 
         $this->pushManager = new PushManager($environment);
 
-        $adapterName = $this->getAdapterClass($this->config['service']);
+        $adapterName = isset($this->config['adapter'])
+            ? $this->config['adapter']
+            : $this->getAdapterClass($this->config['service']);
 
         $this->validateAdapter($adapterName);
 
-        $this->adapter = $this->createAdapter($adapterName);
+        $this->adapter = $this->createAdapter($adapterName, $this->config);
     }
 
     private function getAdapterClass($name)
     {
-        return 'Sly\\NotificationPusher\\Adapter\\' . ucfirst($name);
+        return 'Dec\\Push\\Adapters\\' . ucfirst($name) . 'Adapter';
     }
 
     private function validateAdapter($name)
@@ -47,53 +57,43 @@ class App {
             throw new InvalidPushServiceException("'{$name}' is not a valid adapter");
     }
 
-    private function createAdapter($name)
+    private function createAdapter($name, $config)
     {
-        return new $name();
+        return new $name($config);
     }
 
-    public function to($devices)
+    /**
+     * @param PushInterface $push
+     * @return $this
+     */
+    public function queue(PushInterface $push)
     {
-        if ($devices instanceof DeviceInterface)
-        {
-            $this->devices = new DeviceCollection([$devices]);
-        }
-        else if ($devices instanceof DeviceCollection)
-        {
-            $this->devices = $devices;
-        }
-
-        return $this;
-    }
-
-    public function queue($content, $parameters = [])
-    {
-        if ( ! is_a($content, 'Message'))
-            $content = new Message($content, $parameters);
-
-
-        $push = new Push(
-            $this->adapter,
-            $this->devices,
-            $content
-        );
-
         $this->pushManager->add($push);
 
         return $this;
     }
 
     /**
-     * @param mixed $message
-     * @param array $options
+     * Queue Push if present and process queue
+     * @param PushInterface $push
      * @return array
      */
-    public function send($message = null, $options = [])
+    public function send(PushInterface $push = null)
     {
-        if ($message)
-            $this->queue($message, $options);
+        if ($push)
+            $this->queue($push);
 
         return $this->pushManager->send();
+    }
+
+    /**
+     * Alias for send()
+     * @param PushInterface $push
+     * @return array
+     */
+    public function push(PushInterface $push = null)
+    {
+        return $this->send($push);
     }
 
 }
