@@ -1,6 +1,6 @@
 <?php namespace Dec\Push;
 
-use Dec\Models\App;
+use Dec\Push\Models\App;
 
 class Push {
 

@@ -1,12 +1,4 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: decnorton
- * Date: 15/07/2014
- * Time: 22:23
- */
-
-namespace Dec;
+<?php namespace Dec\Push;
 
 use Dec\Push\Models\PushInterface;
 use Illuminate\Support\Collection;

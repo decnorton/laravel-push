@@ -1,13 +1,4 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: decnorton
- * Date: 15/07/2014
- * Time: 22:04
- */
-
-namespace Dec\Models;
-
+<?php namespace Dec\Push\Models;
 
 use DateTime;
 use Dec\Collection\DeviceCollection;

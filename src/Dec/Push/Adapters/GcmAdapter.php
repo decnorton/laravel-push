@@ -1,12 +1,10 @@
 <?php namespace Dec\Push\Adapters;
 
-use Dec\Adapters\BaseAdapter;
 use Dec\Collection\DeviceCollection;
-use Dec\Models\GcmMessage;
-use Dec\Models\GcmResponse;
-use Dec\Models\MessageInterface;
-use Dec\Models\PushResult;
+use Dec\Push\Models\GcmMessage;
+use Dec\Push\Models\GcmResponse;
 use Dec\Push\Models\PushInterface;
+use Dec\Push\Models\PushResult;
 use GuzzleHttp\Client;
 
 class GcmAdapter extends BaseAdapter {
@@ -42,7 +40,7 @@ class GcmAdapter extends BaseAdapter {
      * Send the push
      *
      * @param PushInterface $push Push
-     * @return \Dec\Models\PushResult
+     * @return PushResult
      */
     public function push(PushInterface $push)
     {

@@ -1,13 +1,4 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: decnorton
- * Date: 15/07/2014
- * Time: 00:26
- */
-
-namespace Dec\Models;
-
+<?php namespace Dec\Push\Models;
 
 interface ResponseInterface {
 

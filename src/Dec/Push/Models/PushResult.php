@@ -1,13 +1,4 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: decnorton
- * Date: 15/07/2014
- * Time: 22:52
- */
-
-namespace Dec\Models;
-
+<?php namespace Dec\Push\Models;
 
 class PushResult {
 

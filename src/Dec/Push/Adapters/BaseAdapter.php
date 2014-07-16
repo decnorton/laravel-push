@@ -1,15 +1,4 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: decnorton
- * Date: 14/07/2014
- * Time: 23:54
- */
-
-namespace Dec\Adapters;
-
-
-use Dec\Push\Adapters\AdapterInterface;
+<?php namespace Dec\Push\Adapters;
 
 abstract class BaseAdapter implements AdapterInterface {
 

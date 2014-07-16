@@ -1,4 +1,4 @@
-<?php namespace Dec\Models;
+<?php namespace Dec\Push\Models;
 
 use Config;
 use Dec\Collection\DeviceCollection;

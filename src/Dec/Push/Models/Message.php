@@ -1,12 +1,4 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: decnorton
- * Date: 15/07/2014
- * Time: 22:01
- */
-
-namespace Dec\Models;
+<?php namespace Dec\Push\Models;
 
 
 class Message implements MessageInterface {
