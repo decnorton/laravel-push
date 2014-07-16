@@ -1,9 +1,9 @@
 <?php namespace Dec\Push\Models;
 
 use DateTime;
-use Dec\Collection\DeviceCollection;
+use Dec\Push\Collection\DeviceCollection;
 
-interface PushInterface {
+interface PushNotification {
 
     const STATUS_PENDING = 'pending';
     const STATUS_SENDING = 'sending';
@@ -32,15 +32,15 @@ interface PushInterface {
     public function sent();
 
     /**
-     * @return MessageInterface
+     * @return Message
      */
     public function getMessage();
 
     /**
-     * @param MessageInterface $message
-     * @return PushInterface
+     * @param Message $message
+     * @return PushNotification
      */
-    public function setMessage(MessageInterface $message);
+    public function setMessage(Message $message);
 
     /**
      * @return DeviceCollection
@@ -48,8 +48,8 @@ interface PushInterface {
     public function getDevices();
 
     /**
-     * @param DeviceCollection $devices
-     * @return PushInterface
+     * @param \Dec\Push\Collection\DeviceCollection $devices
+     * @return PushNotification
      */
     public function setDevices(DeviceCollection $devices);
 
@@ -60,8 +60,10 @@ interface PushInterface {
 
     /**
      * @param DateTime $timestamp
-     * @return PushInterface
+     * @return PushNotification
      */
     public function setSentAt(DateTime $timestamp);
+
+    public function __toString();
 
 }

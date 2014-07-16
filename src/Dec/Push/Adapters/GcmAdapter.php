@@ -1,12 +1,14 @@
 <?php namespace Dec\Push\Adapters;
 
-use Dec\Collection\DeviceCollection;
-use Dec\Push\Models\GcmMessage;
-use Dec\Push\Models\GcmResponse;
-use Dec\Push\Models\MessageInterface;
-use Dec\Push\Models\Push;
-use Dec\Push\Models\PushInterface;
-use Dec\Push\Models\PushResult;
+use Dec\Push\Collection\DeviceCollection;
+use Dec\Push\Collection\PushResponseCollection;
+use Dec\Push\Gcm\GcmMessage;
+use Dec\Push\Gcm\GcmNotification;
+use Dec\Push\Gcm\GcmResponse;
+use Dec\Push\Models\Message;
+use Dec\Push\Models\PushNotification;
+use Dec\Push\Collection\PushResult;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client;
 
 class GcmAdapter extends BaseAdapter {
@@ -50,67 +52,69 @@ class GcmAdapter extends BaseAdapter {
 
     /**
      * @param DeviceCollection $devices
-     * @param MessageInterface $message
-     * @return PushInterface
+     * @param Message $message
+     * @return PushNotification
      */
-    public function createPush(DeviceCollection $devices, MessageInterface $message)
+    public static function createPush(DeviceCollection $devices, Message $message)
     {
-        return new Push($devices, $message);
+        return new GcmNotification($devices, $message);
     }
 
     /**
      * Send the push
      *
-     * @param PushInterface $push Push
-     * @return PushResult
+     * @param PushNotification $push Push
+     * @return \Dec\Push\Collection\PushResult
      */
-    public function push(PushInterface $push)
+    public function push(PushNotification $push)
     {
-        $push->setStatus(PushInterface::STATUS_SENDING);
+        $push->setStatus(PushNotification::STATUS_SENDING);
 
-        $tokens = array_chunk($push->getDevices(), 100);
+        $devices = $push->getDevices()->chunk(100);
 
         $responses = [];
-        $successful = [];
-        $failed = [];
 
-        foreach ($tokens as $devices)
+        foreach ($devices as $chunk)
         {
-            $response = $this->sendPush($devices, $push->getMessage());
-            $successful = array_merge($successful, $response->getSuccessfulResults());
-            $failed = array_merge($failed, $response->getFailedResults());
+            $response = $this->sendBatch($chunk, $push->getMessage());
 
             $responses[] = $response;
         }
 
-        $push->setStatus(PushInterface::STATUS_SENT);
+        $push->setStatus(PushNotification::STATUS_SENT);
 
-        return new PushResult($responses, $successful, $failed);
+        return new PushResponseCollection($push, $responses);
     }
 
     /**
-     * @param DeviceCollection $devices
-     * @param GcmMessage $message
-     * @return GcmResponse
+     * @param \Dec\Push\Collection\DeviceCollection $devices
+     * @param Message $message
+     * @return \Dec\Push\Gcm\GcmResponse
      */
-    protected function sendPush(DeviceCollection $devices, GcmMessage $message)
+    protected function sendBatch(DeviceCollection $devices, Message $message)
     {
-        $body = array_merge($message->getParameters(), [
-            'data'              => $message->getContent(),
+        $body = array_merge($message->getBody(), [
             'registration_ids'  => $devices->getTokens()
         ]);
 
-        $response = $this->client->post(self::URL, [
-            'headers' => [
-                'Authorization' => 'key=' . $this->apiKey,
-                'Content-Type'  => 'application/json'
-            ],
-            'body' => json_encode($body)
-        ]);
+        try {
+            $response = $this->client->post(self::URL, [
+                'headers' => [
+                    'Authorization' => 'key=' . $this->apiKey,
+                    'Content-Type' => 'application/json'
+                ],
+                'body' => json_encode($body)
+            ]);
 
-        $json = json_encode($response->getBody());
-
-        return GcmResponse::fromJson($response->getStatusCode(), $json);
+            return GcmResponse::fromJson(
+                $devices,
+                $message,
+                $response->getStatusCode(),
+                $response->json()
+            );
+        } catch (RequestException $e) {
+            throw $e;
+        }
     }
 
     /**

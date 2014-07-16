@@ -1,13 +1,13 @@
 <?php namespace Dec\Push\Models;
 
 use Config;
-use Dec\Collection\DeviceCollection;
-use Dec\Push\Adapters\AdapterInterface;
+use Dec\Push\Collection\DeviceCollection;
+use Dec\Push\Adapters\Adapter;
 use Dec\Push\Exceptions\InvalidAppException;
 use Dec\Push\Exceptions\InvalidPushServiceException;
 use Dec\Push\PushManager;
 
-class App {
+class Configuration {
 
     /**
      * @var array
@@ -20,7 +20,7 @@ class App {
     protected $pushManager;
 
     /**
-     * @var AdapterInterface
+     * @var Adapter
      */
     protected $adapter;
 
@@ -35,15 +35,18 @@ class App {
                 ? PushManager::ENV_DEVELOPMENT
                 : PushManager::ENV_PRODUCTION;
 
-        $this->pushManager = new PushManager($environment);
-
         $adapterName = isset($this->config['adapter'])
             ? $this->config['adapter']
             : $this->getAdapterClass($this->config['service']);
 
+        // Check if it's a valid adapter
         $this->validateAdapter($adapterName);
 
+        // Create the adapter
         $this->adapter = $this->createAdapter($adapterName, $this->config);
+
+        // Create the PushManager
+        $this->pushManager = new PushManager($this->adapter, $environment);
     }
 
     private function getAdapterClass($name)
@@ -63,10 +66,10 @@ class App {
     }
 
     /**
-     * @param PushInterface $push
+     * @param PushNotification $push
      * @return $this
      */
-    public function queue(PushInterface $push)
+    public function queue(PushNotification $push)
     {
         $this->pushManager->add($push);
 
@@ -75,10 +78,10 @@ class App {
 
     /**
      * Queue Push if present and process queue
-     * @param PushInterface $push
+     * @param PushNotification $push
      * @return array
      */
-    public function send(PushInterface $push = null)
+    public function send(PushNotification $push = null)
     {
         if ($push)
             $this->queue($push);
@@ -88,10 +91,10 @@ class App {
 
     /**
      * Alias for send()
-     * @param PushInterface $push
+     * @param PushNotification $push
      * @return array
      */
-    public function push(PushInterface $push = null)
+    public function push(PushNotification $push = null)
     {
         return $this->send($push);
     }

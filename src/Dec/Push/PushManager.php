@@ -1,6 +1,7 @@
 <?php namespace Dec\Push;
 
-use Dec\Push\Models\PushInterface;
+use Dec\Push\Adapters\Adapter;
+use Dec\Push\Models\PushNotification;
 use Illuminate\Support\Collection;
 
 class PushManager extends Collection {
@@ -14,15 +15,21 @@ class PushManager extends Collection {
         self::ENV_DEVELOPMENT,
         self::ENV_PRODUCTION
     ];
+    /**
+     * @var Adapter
+     */
+    private $adapter;
 
-    function __construct($environment = self::ENV_PRODUCTION)
+    function __construct(Adapter $adapter, $environment = self::ENV_PRODUCTION)
     {
         if ( ! in_array($environment, $this->validEnvironments))
             throw new \InvalidArgumentException('Not a valid environment');
 
+        $this->adapter = $adapter;
         $this->environment = $environment;
-    }
 
+        $this->adapter->setEnvironment($this->getEnvironment());
+    }
 
     /**
      * @return string
@@ -42,9 +49,9 @@ class PushManager extends Collection {
 
     /**
      * Adds a Push to the queue
-     * @param PushInterface $push
+     * @param PushNotification $push
      */
-    public function add(PushInterface $push)
+    public function add(PushNotification $push)
     {
         if ( ! empty($push))
             $this->items[] = $push;
@@ -52,9 +59,9 @@ class PushManager extends Collection {
 
     /**
      * Alias for add()
-     * @param PushInterface $push
+     * @param PushNotification $push
      */
-    public function queue(PushInterface $push)
+    public function queue(PushNotification $push)
     {
         $this->add($push);
     }
@@ -68,13 +75,10 @@ class PushManager extends Collection {
 
         foreach ($this as $push)
         {
-            if ($push instanceof PushInterface)
+            if ($push instanceof PushNotification)
             {
-                $adapter = $push->getAdapter();
-                $adapter->setEnvironment($this->getEnvironment());
-
-                if ($result = $adapter->push($push))
-                    $results[] = $result;
+                if ($result = $this->adapter->push($push))
+                    $results[(string) $push] = $result;
             }
         }
 

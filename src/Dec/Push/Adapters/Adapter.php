@@ -1,15 +1,15 @@
 <?php namespace Dec\Push\Adapters;
 
-use Dec\Collection\DeviceCollection;
-use Dec\Push\Models\MessageInterface;
-use Dec\Push\Models\PushInterface;
+use Dec\Push\Collection\DeviceCollection;
+use Dec\Push\Models\Message;
+use Dec\Push\Models\PushNotification;
 
 /**
  * AdapterInterface.
  *
  * @author Cédric Dugat <cedric@dugat.me>
  */
-interface AdapterInterface {
+interface Adapter {
 
     /**
      * @param $environment
@@ -25,9 +25,9 @@ interface AdapterInterface {
     /**
      * Send the push
      *
-     * @param PushInterface $push Push
+     * @param PushNotification $push Push
      */
-    public function push(PushInterface $push);
+    public function push(PushNotification $push);
 
     /**
      * Check if valid token
@@ -40,16 +40,16 @@ interface AdapterInterface {
     /**
      * @param $content
      * @param $parameters
-     * @return MessageInterface
+     * @return Message
      */
     public function createMessage($content, $parameters);
 
     /**
      * @param DeviceCollection $devices
-     * @param MessageInterface $message
-     * @return PushInterface
+     * @param Message $message
+     * @return PushNotification
      */
-    public function createPush(DeviceCollection $devices, MessageInterface $message);
+    public static function createPush(DeviceCollection $devices, Message $message);
 
     /**
      * Get default parameters.

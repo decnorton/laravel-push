@@ -1,29 +1,41 @@
-<?php namespace Dec\Collection;
+<?php namespace Dec\Push\Collection;
 
-use Dec\Push\Models\DeviceInterface;
+use Config;
+use Dec\Push\Devices\Device;
 use Illuminate\Support\Collection;
 
 class DeviceCollection extends Collection {
 
+    /**
+     * @param array $devices
+     */
     function __construct(array $devices = [])
     {
+        $devices = array_unique($devices);
+
+        $deviceModelName = Config::get('push::device_model', 'SimpleDevice');
+
         // Make sure we're getting an array of DeviceInterfaces
-        foreach ($devices as $device)
+        foreach ($devices as &$device)
         {
-            if ( ! is_a($device, 'DeviceInterface'))
-                throw new \InvalidArgumentException('Array must contain only DeviceInterfaces');
+            if ($device instanceof Device || $device instanceof DeviceCollection)
+                continue;
+
+            if (is_string($device) || is_numeric($device))
+                $device = $deviceModelName::withToken((string) $device);
+            else
+                throw new \InvalidArgumentException('Array must contain DeviceInterfaces or token strings');
         }
 
-        parent::__construct();
+        parent::__construct($devices);
     }
-
 
     /**
      * Add a device to the collection
      *
-     * @param DeviceInterface $device
+     * @param Device $device
      */
-    public function add(DeviceInterface $device)
+    public function add(Device $device)
     {
         $this->items[] = $device;
     }
@@ -37,7 +49,14 @@ class DeviceCollection extends Collection {
         $tokens = [];
 
         foreach ($this as $device) {
-            $tokens[] = $device->getToken();
+            if ($device instanceof DeviceCollection)
+            {
+                $tokens = array_merge($tokens, $device->getTokens());
+            }
+            else if ($device instanceof Device)
+            {
+                $tokens[] = $device->getToken();
+            }
         }
 
         return array_unique(array_filter($tokens));

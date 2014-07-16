@@ -1,12 +1,11 @@
 <?php namespace Dec\Push\Adapters;
 
-abstract class BaseAdapter implements AdapterInterface {
+abstract class BaseAdapter implements Adapter {
 
     /**
      * @var string
      */
     private $environment;
-
 
     /**
      * @param $environment
@@ -24,6 +23,5 @@ abstract class BaseAdapter implements AdapterInterface {
     {
         return $this->environment;
     }
-
 
 }

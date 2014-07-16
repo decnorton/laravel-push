@@ -1,6 +1,6 @@
-<?php namespace Dec\Push\Models;
+<?php namespace Dec\Push\Devices;
 
-interface DeviceInterface {
+interface Device {
 
     /**
      * Get device token
@@ -13,5 +13,11 @@ interface DeviceInterface {
      * @param string $token
      */
     public function setToken($token);
+
+    /**
+     * @param $token
+     * @return Device
+     */
+    public static function withToken($token);
 
 }
