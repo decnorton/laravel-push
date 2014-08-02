@@ -18,7 +18,7 @@ class GcmNotification extends BasePushNotification implements PushNotification {
     {
         if ( ! is_a($devices, 'DeviceCollection'))
         {
-            if (! is_array($devices))
+            if ( ! is_array($devices) && ! is_a($devices, '\Illuminate\Support\Collection'))
                 throw new \InvalidArgumentException('First parameter must be a DeviceCollection or array of DeviceInterfaces');
 
             $devices = new DeviceCollection($devices);

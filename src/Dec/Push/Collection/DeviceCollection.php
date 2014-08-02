@@ -9,8 +9,14 @@ class DeviceCollection extends Collection {
     /**
      * @param array $devices
      */
-    function __construct(array $devices = [])
+    function __construct($devices = [])
     {
+        if ($devices instanceof Collection)
+            $devices = $devices->all();
+
+        if ( ! is_array($devices))
+            throw new \InvalidArgumentException('$devices must be an array or an instance of Illuminate\Support\Collection');
+
         $devices = array_unique($devices);
 
         $deviceModelName = Config::get('push::device_model', 'SimpleDevice');
@@ -25,6 +31,7 @@ class DeviceCollection extends Collection {
                 $device = $deviceModelName::withToken((string) $device);
             else
                 throw new \InvalidArgumentException('Array must contain DeviceInterfaces or token strings');
+
         }
 
         parent::__construct($devices);
